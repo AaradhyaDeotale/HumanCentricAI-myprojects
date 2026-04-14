@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Project 1 - Supervised Learning</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        h1 { color: #333; }
+        .data-table { border-collapse: collapse; width: 100%; margin: 20px 0; }
+        .data-table th, .data-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        .data-table th { background-color: #4CAF50; color: white; }
+        select, input { margin: 5px; padding: 5px; }
+        button { padding: 8px 16px; background: #4CAF50; color: white; border: none; cursor: pointer; }
+        img { max-width: 100%; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Supervised Learning Interface</h1>
+
+    <h2>Step 1: Upload your CSV</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="csv_file" accept=".csv">
+        
+        {% if columns %}
+        <h2>Step 2: Select features to plot</h2>
+        <label>X axis:
+            <select name="x_col">
+                {% for col in columns %}
+                <option value="{{ col }}" {% if col == x_col %}selected{% endif %}>{{ col }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label>Y axis:
+            <select name="y_col">
+                {% for col in columns %}
+                <option value="{{ col }}" {% if col == y_col %}selected{% endif %}>{{ col }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        {% endif %}
+        
+        <br><br>
+        <button type="submit">Upload / Update Plot</button>
+    </form>
+
+    {% if shape %}
+    <p>Dataset shape: {{ shape.0 }} rows × {{ shape.1 }} columns</p>
+    {% endif %}
+
+    {% if table %}
+    <h2>Data Preview (first 10 rows)</h2>
+    {{ table|safe }}
+    {% endif %}
+
+    {% if plot %}
+    <h2>Scatter Plot</h2>
+    <img src="data:image/png;base64,{{ plot }}" alt="Scatter Plot">
+    {% endif %}
+
+    {% if columns %}
+    <hr>
+    <h2>Step 3: Train a Machine Learning Model</h2>
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="x_col" value="{{ x_col }}">
+        <input type="hidden" name="y_col" value="{{ y_col }}">
+
+        <label>Model:
+            <select name="model">
+                <option value="knn" {% if model_name == 'knn' %}selected{% endif %}>K-Nearest Neighbors</option>
+                <option value="decision_tree" {% if model_name == 'decision_tree' %}selected{% endif %}>Decision Tree</option>
+                <option value="svm" {% if model_name == 'svm' %}selected{% endif %}>SVM</option>
+            </select>
+        </label>
+
+        <label>Test set size (%):
+            <input type="number" name="test_size" min="10" max="50" value="{{ test_size|default:20 }}">
+        </label>
+
+        <label>Hyperparameter value:
+            <input type="number" name="hyperparameter" min="1" max="20" value="{{ hyperparameter|default:5 }}">
+            {% if hyperparam_label %}<small>({{ hyperparam_label }})</small>{% endif %}
+        </label>
+
+        <br><br>
+        <button type="submit">Train Model</button>
+    </form>
+
+    {% if accuracy %}
+    <h3>Results</h3>
+    <p><strong>Model:</strong> {{ model_name }} &nbsp;|&nbsp;
+       <strong>{{ hyperparam_label }}:</strong> {{ hyperparameter }} &nbsp;|&nbsp;
+       <strong>Test size:</strong> {{ test_size }}% &nbsp;|&nbsp;
+       <strong>Accuracy:</strong> {{ accuracy }}%</p>
+
+    <h4>Classification Report</h4>
+    {{ report|safe }}
+
+    <h4>Accuracy vs Hyperparameter</h4>
+    <img src="data:image/png;base64,{{ acc_plot }}" alt="Accuracy vs Hyperparameter">
+    {% endif %}
+    {% endif %}
+
+</body>
+</html>
