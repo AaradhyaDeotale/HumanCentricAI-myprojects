@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'project2/style.css' %}">
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js" charset="utf-8"></script>
+{% endblock %}
+
+{% block content %}
+<div class="box p2-box">
+    <div class="title-container">
+        <div class="title">Explainability</div>
+    </div>
+
+    <div class="main-text">
+        <p class="centered-text p2-intro">
+            Palmer Penguins &dash; predicting <strong>species</strong> from morphology.
+            Choose a model class and a regularisation level&nbsp;(&lambda;); every panel below
+            (tree / coefficients, counterfactuals and feature&nbsp;effects) updates live from the
+            same selected model. Trained on {{ n_samples }} complete records.
+        </p>
+
+        <!-- ===================== GLOBAL CONTROLS ===================== -->
+        <div class="p2-controls">
+            <div class="p2-control">
+                <label>Model class</label>
+                <div class="p2-segmented" id="model-type-toggle">
+                    <button class="p2-seg-btn active" data-value="tree">Decision tree</button>
+                    <button class="p2-seg-btn" data-value="logistic">Logistic regression</button>
+                </div>
+            </div>
+
+            <div class="p2-control p2-control-grow">
+                <label>
+                    Regularisation &lambda; &mdash; penalises complexity
+                    <span class="p2-hint" id="lambda-hint"></span>
+                </label>
+                <input type="range" id="lambda-slider" min="0" max="1" step="0.0001" value="0">
+                <div class="p2-lambda-readout">
+                    &lambda; = <span id="lambda-value">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- model summary chips -->
+        <div class="p2-summary" id="model-summary">
+            <div class="p2-chip"><span class="p2-chip-label">Test accuracy</span>
+                <span class="p2-chip-value" id="chip-acc">&ndash;</span></div>
+            <div class="p2-chip"><span class="p2-chip-label" id="chip-omega-label">Complexity &Omega;</span>
+                <span class="p2-chip-value" id="chip-omega">&ndash;</span></div>
+            <div class="p2-chip"><span class="p2-chip-label">Train accuracy</span>
+                <span class="p2-chip-value" id="chip-acc-train">&ndash;</span></div>
+        </div>
+
+        <!-- ===================== TASK 1 & 2 & 3: MODEL ===================== -->
+        <section class="p2-section">
+            <h2 class="p2-h2">Model <span class="p2-tasknote">Tasks 1&ndash;3 &middot; the fitted model at the current &lambda;</span></h2>
+
+            <!-- selection curve: accuracy vs complexity, with the chosen point -->
+            <div id="selection-plot" class="p2-plot p2-plot-short"></div>
+
+            <!-- tree view (only for trees) -->
+            <div id="tree-container" class="p2-tree-wrap">
+                <div id="tree-plot" class="p2-plot"></div>
+                <details class="p2-details">
+                    <summary>Show tree as text</summary>
+                    <pre id="tree-text" class="p2-pre"></pre>
+                </details>
+            </div>
+
+            <!-- coefficient view (only for logistic regression) -->
+            <div id="coef-container" class="p2-plot" style="display:none;"></div>
+        </section>
+
+        <!-- ===================== TASK 4: COUNTERFACTUALS ===================== -->
+        <section class="p2-section">
+            <h2 class="p2-h2">Counterfactual explanations
+                <span class="p2-tasknote">Task 4 &middot; "what minimal change flips the prediction?"</span></h2>
+
+            <div class="p2-cf-controls">
+                <div class="p2-control">
+                    <label>Instance&nbsp;x</label>
+                    <select id="cf-instance"></select>
+                </div>
+                <div class="p2-control">
+                    <label>Target class</label>
+                    <select id="cf-target"></select>
+                </div>
+                <div class="p2-control">
+                    <label>How many (k)</label>
+                    <select id="cf-k">
+                        <option value="1">1</option>
+                        <option value="3" selected>3</option>
+                        <option value="5">5</option>
+                    </select>
+                </div>
+                <div class="p2-control p2-control-btn">
+                    <button id="cf-run" class="p2-btn">Generate</button>
+                </div>
+            </div>
+
+            <div id="cf-result" class="p2-cf-result"></div>
+        </section>
+
+        <!-- ===================== TASK 5: FEATURE EFFECTS ===================== -->
+        <section class="p2-section">
+            <h2 class="p2-h2">Feature effect plots
+                <span class="p2-tasknote">Task 5 &middot; PDP &amp; ALE, three curves (one per species)</span></h2>
+
+            <div class="p2-control">
+                <label>Numeric feature</label>
+                <select id="fe-feature">
+                    {% for f in numeric_features %}
+                        <option value="{{ f.value }}">{{ f.label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="p2-fe-grid">
+                <div id="pdp-plot" class="p2-plot"></div>
+                <div id="ale-plot" class="p2-plot"></div>
+            </div>
+            <p class="p2-method-note" id="ale-method-note"></p>
+        </section>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    // URLs injected from Django so the JS file stays static-cacheable.
+    window.P2_URLS = {
+        meta:           "{% url 'project2:api_meta' %}",
+        model:          "{% url 'project2:api_model' %}",
+        counterfactuals:"{% url 'project2:api_counterfactuals' %}",
+        featureEffect:  "{% url 'project2:api_feature_effect' %}",
+    };
+    window.P2_CSRF = "{{ csrf_token }}";
+    window.P2_CLASSES = {{ classes|safe }};
+</script>
+<script src="{% static 'project2/app.js' %}"></script>
+{% endblock %}

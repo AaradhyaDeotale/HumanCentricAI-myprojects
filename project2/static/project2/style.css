@@ -1,0 +1,223 @@
+/* Project 2 — Explainability. Project-specific styles.
+ * Kept intentionally restrained (the course is not about UX) but cohesive with
+ * the global blue theme. The main job here is to override the global .box rule,
+ * which absolute-centers content — unsuitable for this long, scrolling page.   */
+
+.p2-box {
+    position: static;          /* override absolute centering from global CSS */
+    transform: none;
+    width: 92%;
+    max-width: 1100px;
+    margin: 24px auto 60px;
+    grid-template-rows: auto auto;
+    padding-bottom: 24px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+}
+
+.p2-intro {
+    color: #33415c;
+    font-size: 16px;
+    line-height: 1.5;
+    max-width: 820px;
+    margin: 0 auto 8px;
+}
+
+.centered-text { text-align: center; }
+
+/* ---------- global controls ---------- */
+.p2-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 28px;
+    align-items: flex-end;
+    background: #f4f7fc;
+    border: 1px solid #dbe4f3;
+    border-radius: 8px;
+    padding: 18px 22px;
+    margin: 18px 0 14px;
+}
+
+.p2-control { display: flex; flex-direction: column; gap: 6px; }
+.p2-control-grow { flex: 1 1 320px; }
+.p2-control-btn { justify-content: flex-end; }
+
+.p2-control label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #33415c;
+    text-align: left;
+}
+
+.p2-hint { font-weight: 400; color: #7a8aa5; margin-left: 6px; font-size: 12px; }
+
+.p2-control select,
+.p2-control input[type="range"] {
+    font-size: 14px;
+}
+
+.p2-control select {
+    padding: 7px 9px;
+    border: 1px solid #c2cfe5;
+    border-radius: 6px;
+    background: white;
+    min-width: 160px;
+}
+
+input[type="range"]#lambda-slider {
+    width: 100%;
+    accent-color: #275CB2;
+    cursor: pointer;
+}
+
+.p2-lambda-readout { font-size: 13px; color: #475672; }
+.p2-lambda-readout span { font-weight: 700; color: #275CB2; }
+
+/* segmented toggle for model class */
+.p2-segmented {
+    display: inline-flex;
+    border: 1px solid #c2cfe5;
+    border-radius: 6px;
+    overflow: hidden;
+    background: white;
+}
+.p2-seg-btn {
+    /* reset the global heavy button styling for these compact toggles */
+    width: auto;
+    height: auto;
+    display: inline-block;
+    margin: 0;
+    border-radius: 0;
+    background: white;
+    color: #33415c;
+    opacity: 1;
+    font-size: 14px;
+    padding: 8px 16px;
+    border: none;
+    border-right: 1px solid #e2e9f5;
+}
+.p2-seg-btn:last-child { border-right: none; }
+.p2-seg-btn.active { background: #275CB2; color: white; }
+.p2-seg-btn:hover { opacity: 1; background: #e8effb; }
+.p2-seg-btn.active:hover { background: #275CB2; }
+
+/* ---------- summary chips ---------- */
+.p2-summary { display: flex; gap: 14px; flex-wrap: wrap; margin: 6px 0 4px; }
+.p2-chip {
+    background: white;
+    border: 1px solid #dbe4f3;
+    border-radius: 8px;
+    padding: 10px 16px;
+    display: flex;
+    flex-direction: column;
+    min-width: 120px;
+}
+.p2-chip-label { font-size: 12px; color: #7a8aa5; }
+.p2-chip-value { font-size: 22px; font-weight: 700; color: #275CB2; }
+
+/* ---------- sections ---------- */
+.p2-section {
+    border-top: 1px solid #e2e9f5;
+    margin-top: 26px;
+    padding-top: 16px;
+}
+.p2-h2 {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 24px;
+    color: #1f3a66;
+    margin: 0 0 10px;
+}
+.p2-tasknote {
+    display: block;
+    font-size: 13px;
+    font-weight: 400;
+    color: #8090ab;
+    margin-top: 2px;
+}
+
+.p2-plot { width: 100%; min-height: 300px; }
+.p2-plot-short { min-height: 260px; }
+
+.p2-fe-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+@media (max-width: 760px) {
+    .p2-fe-grid { grid-template-columns: 1fr; }
+}
+
+.p2-method-note { font-size: 13px; color: #6b7a96; margin-top: 8px; }
+
+.p2-details { margin-top: 8px; }
+.p2-details summary { cursor: pointer; color: #275CB2; font-size: 14px; }
+.p2-pre {
+    background: #1f2937;
+    color: #e5edf7;
+    padding: 14px;
+    border-radius: 6px;
+    overflow-x: auto;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+/* ---------- counterfactuals ---------- */
+.p2-cf-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    align-items: flex-end;
+    margin-bottom: 14px;
+}
+.p2-btn {
+    width: auto;
+    height: auto;
+    margin: 0;
+    display: inline-block;
+    padding: 9px 22px;
+    font-size: 15px;
+    border-radius: 6px;
+}
+.p2-cf-result { margin-top: 6px; }
+.p2-placeholder { color: #8090ab; font-style: italic; }
+.p2-error { color: #b3261e; }
+
+.p2-cf-orig {
+    background: #f4f7fc;
+    border: 1px solid #dbe4f3;
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+.p2-kv {
+    display: inline-block;
+    margin-right: 10px;
+    color: #475672;
+}
+.p2-cf-caption { font-size: 15px; color: #33415c; }
+
+.p2-cf-card {
+    border: 1px solid #dbe4f3;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+    background: white;
+}
+.p2-cf-rank { font-weight: 700; color: #1f3a66; margin-bottom: 6px; }
+.p2-cf-dist { font-weight: 400; color: #8090ab; font-size: 13px; margin-left: 8px; }
+
+.p2-cf-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.p2-cf-table th {
+    text-align: left;
+    color: #7a8aa5;
+    font-weight: 600;
+    border-bottom: 1px solid #e2e9f5;
+    padding: 4px 8px;
+}
+.p2-cf-table td { padding: 5px 8px; border-bottom: 1px solid #f0f4fa; }
+.p2-up { color: #2E8B72; font-weight: 600; }
+.p2-down { color: #E07B39; font-weight: 600; }
+.p2-cat { color: #8B5CF6; font-weight: 600; }
+
+/* Plotly tweak: let plots size to container nicely */
+.js-plotly-plot { width: 100% !important; }
