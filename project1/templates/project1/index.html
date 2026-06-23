@@ -10,41 +10,57 @@
         .data-table th { background-color: #4CAF50; color: white; }
         select, input { margin: 5px; padding: 5px; }
         button { padding: 8px 16px; background: #4CAF50; color: white; border: none; cursor: pointer; }
+        button.secondary { background: #777; }
         img { max-width: 100%; margin-top: 20px; }
+        .error { background: #ffe0e0; border: 1px solid #cc0000; color: #900;
+                 padding: 10px 14px; border-radius: 4px; margin: 15px 0; }
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 12px;
+                 background: #2196F3; color: white; font-size: 13px; }
+        .plots { display: flex; flex-wrap: wrap; gap: 20px; }
+        .plots img { max-width: 480px; }
     </style>
 </head>
 <body>
     <h1>Supervised Learning Interface</h1>
 
+    {% if error %}<div class="error">{{ error }}</div>{% endif %}
+
     <h2>Step 1: Upload your CSV</h2>
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <input type="file" name="csv_file" accept=".csv">
-        
+
         {% if columns %}
         <h2>Step 2: Select features to plot</h2>
         <label>X axis:
             <select name="x_col">
-                {% for col in columns %}
+                {% for col in numeric_features %}
                 <option value="{{ col }}" {% if col == x_col %}selected{% endif %}>{{ col }}</option>
                 {% endfor %}
             </select>
         </label>
         <label>Y axis:
             <select name="y_col">
-                {% for col in columns %}
+                {% for col in numeric_features %}
                 <option value="{{ col }}" {% if col == y_col %}selected{% endif %}>{{ col }}</option>
                 {% endfor %}
             </select>
         </label>
         {% endif %}
-        
+
         <br><br>
         <button type="submit">Upload / Update Plot</button>
     </form>
 
     {% if shape %}
-    <p>Dataset shape: {{ shape.0 }} rows × {{ shape.1 }} columns</p>
+    <p>Dataset shape: {{ shape.0 }} rows &times; {{ shape.1 }} columns
+       &nbsp;|&nbsp; Label column: <strong>{{ label_col }}</strong>
+       &nbsp;|&nbsp; Detected problem: <span class="badge">{{ problem_type }}</span></p>
+    <form method="post" style="display:inline">
+        {% csrf_token %}
+        <button type="submit" name="clear" value="1" class="secondary"
+                formaction="{% url 'project1:clear' %}">Clear data</button>
+    </form>
     {% endif %}
 
     {% if table %}
@@ -52,10 +68,20 @@
     {{ table|safe }}
     {% endif %}
 
-    {% if plot %}
-    <h2>Scatter Plot</h2>
-    <img src="data:image/png;base64,{{ plot }}" alt="Scatter Plot">
-    {% endif %}
+    <div class="plots">
+        {% if plot %}
+        <div>
+            <h2>Scatter Plot</h2>
+            <img src="data:image/png;base64,{{ plot }}" alt="Scatter Plot">
+        </div>
+        {% endif %}
+        {% if heatmap %}
+        <div>
+            <h2>Feature Correlation</h2>
+            <img src="data:image/png;base64,{{ heatmap }}" alt="Correlation Heatmap">
+        </div>
+        {% endif %}
+    </div>
 
     {% if columns %}
     <hr>
@@ -86,19 +112,70 @@
         <button type="submit">Train Model</button>
     </form>
 
-    {% if accuracy %}
+    {% if train_error %}<div class="error">{{ train_error }}</div>{% endif %}
+
+    {% if accuracy is not None and not train_error %}
     <h3>Results</h3>
     <p><strong>Model:</strong> {{ model_name }} &nbsp;|&nbsp;
        <strong>{{ hyperparam_label }}:</strong> {{ hyperparameter }} &nbsp;|&nbsp;
        <strong>Test size:</strong> {{ test_size }}% &nbsp;|&nbsp;
-       <strong>Accuracy:</strong> {{ accuracy }}%</p>
+       <strong>{{ score_label }}:</strong> {{ accuracy }}{% if score_label == 'Accuracy' %}%{% endif %}
+       {% if rmse %}&nbsp;|&nbsp; <strong>RMSE:</strong> {{ rmse }}{% endif %}</p>
 
+    {% if report %}
     <h4>Classification Report</h4>
     {{ report|safe }}
-
-    <h4>Accuracy vs Hyperparameter</h4>
-    <img src="data:image/png;base64,{{ acc_plot }}" alt="Accuracy vs Hyperparameter">
     {% endif %}
+
+    <div class="plots">
+        {% if acc_plot %}
+        <div>
+            <h4>{{ score_label }} vs Hyperparameter</h4>
+            <img src="data:image/png;base64,{{ acc_plot }}" alt="Score vs Hyperparameter">
+        </div>
+        {% endif %}
+        {% if confusion %}
+        <div>
+            <h4>Confusion Matrix</h4>
+            <img src="data:image/png;base64,{{ confusion }}" alt="Confusion Matrix">
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+    {% endif %}
+
+    {% if history %}
+    <hr>
+    <h2>Training History</h2>
+    <p>Total runs recorded: <strong>{{ total_runs }}</strong>
+       {% if best_run %}
+       &nbsp;|&nbsp; Best so far:
+       <span class="badge">{{ best_run.model_name }}
+       ({{ best_run.hyperparameter_label }}={{ best_run.hyperparameter }})
+       &rarr; {{ best_run.score }} {{ best_run.score_label }}</span>
+       {% endif %}
+    </p>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>When</th><th>Dataset</th><th>Model</th><th>Problem</th>
+                <th>Hyperparameter</th><th>Test %</th><th>Score</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for run in history %}
+            <tr {% if run.id == best_run.id %}style="background:#e8f5e9;font-weight:bold"{% endif %}>
+                <td>{{ run.created_at|date:"Y-m-d H:i:s" }}</td>
+                <td>{{ run.dataset_name }}</td>
+                <td>{{ run.model_name }}</td>
+                <td>{{ run.problem_type }}</td>
+                <td>{{ run.hyperparameter_label }} = {{ run.hyperparameter }}</td>
+                <td>{{ run.test_size }}%</td>
+                <td>{{ run.score }} {{ run.score_label }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
     {% endif %}
 
 </body>
