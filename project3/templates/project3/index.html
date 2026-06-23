@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'project3/style.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="box p3-box">
+  <div class="title-container">
+    <div class="title">Project 3 &middot; Active Learning for Learning-to-Defer</div>
+  </div>
+
+  <div class="main-text p3-main">
+    <p class="p3-intro">
+      A classifier labels AG News articles into four topics and collaborates
+      with a simulated human expert. It can either predict itself or
+      <em>defer</em> to the expert. Work through the four tasks below.
+    </p>
+
+    <!-- TASK 1 -->
+    <section class="p3-card">
+      <h3>Task 1 &mdash; Train the baseline classifier</h3>
+      <div class="p3-controls">
+        <label>Model:
+          <select id="kind">
+            <option value="tfidf">TF-IDF + Logistic Regression</option>
+            <option value="distilbert">DistilBERT (needs torch)</option>
+          </select>
+        </label>
+        <label>Train size:
+          <select id="cap">
+            <option value="20000">20k (fast)</option>
+            <option value="60000">60k</option>
+            <option value="all">all 120k</option>
+          </select>
+        </label>
+        <button id="btn-train">Train</button>
+      </div>
+      <div id="train-out" class="p3-out"></div>
+    </section>
+
+    <!-- TASK 2 -->
+    <section class="p3-card">
+      <h3>Task 2 &mdash; Simulated experts</h3>
+      <p class="p3-note">Experts are competent only on some classes. Train first, then view their profiles.</p>
+      <div id="expert-out" class="p3-out"></div>
+    </section>
+
+    <!-- TASK 3 -->
+    <section class="p3-card">
+      <h3>Task 3 &mdash; Learning to defer</h3>
+      <div class="p3-controls">
+        <label>Expert:
+          <select id="defer-expert">
+            <option value="0">World/Sports specialist</option>
+            <option value="1">Business/Tech specialist</option>
+          </select>
+        </label>
+        <label>&tau; (deferral threshold): <span id="tau-val">0.10</span>
+          <input type="range" id="tau" min="-0.2" max="0.4" step="0.05" value="0.1">
+        </label>
+        <button id="btn-defer">Run deferral</button>
+      </div>
+      <div id="defer-out" class="p3-out"></div>
+      <img id="defer-plot" class="p3-plot" style="display:none">
+    </section>
+
+    <!-- TASK 4 -->
+    <section class="p3-card">
+      <h3>Task 4 &mdash; Active learning for expert competence</h3>
+      <div class="p3-controls">
+        <label>Strategy:
+          <select id="al-strategy">
+            <option value="competence_gap">Competence gap</option>
+            <option value="clf_uncertain">Classifier uncertainty</option>
+            <option value="random">Random</option>
+          </select>
+        </label>
+        <label>Budget:
+          <select id="al-budget">
+            <option value="400">400 queries</option>
+            <option value="800">800 queries</option>
+          </select>
+        </label>
+        <button id="btn-active">Run &amp; compare</button>
+      </div>
+      <div id="active-out" class="p3-out"></div>
+      <img id="active-plot" class="p3-plot" style="display:none">
+    </section>
+
+    <!-- DEMO -->
+    <section class="p3-card">
+      <h3>Try it &mdash; classify one article</h3>
+      <div class="p3-controls">
+        <input type="text" id="demo-text" class="p3-text"
+               placeholder="Paste a news headline or article...">
+        <button id="btn-classify">Classify</button>
+      </div>
+      <div id="demo-out" class="p3-out"></div>
+    </section>
+
+    <div class="p3-report">
+      <a href="{% url 'project3:report' %}">&#128196; Download PDF report</a>
+    </div>
+  </div>
+</div>
+
+<script>
+const csrftoken = '{{ csrf_token }}';
+function busy(el){ el.innerHTML = '<span class="p3-spin">working&hellip;</span>'; }
+function jget(url){ return fetch(url).then(r => r.json()); }
+
+document.getElementById('tau').addEventListener('input', e => {
+  document.getElementById('tau-val').textContent = (+e.target.value).toFixed(2);
+});
+
+document.getElementById('btn-train').onclick = () => {
+  const kind = document.getElementById('kind').value;
+  const cap = document.getElementById('cap').value;
+  const out = document.getElementById('train-out');
+  busy(out);
+  jget(`{% url 'project3:train' %}?kind=${kind}&cap=${cap}`).then(d => {
+    if (d.error){ out.textContent = d.error; return; }
+    out.innerHTML = `<b>Test accuracy:</b> ${(d.test_accuracy*100).toFixed(2)}%
+      &nbsp;(${d.kind}, ${d.n_train} train examples)`;
+    const ex = document.getElementById('expert-out');
+    ex.innerHTML = d.experts.map(e => {
+      const pc = Object.entries(e.per_class)
+        .map(([k,v]) => `${k}: ${v}`).join(' &middot; ');
+      return `<div class="p3-expert"><b>${e.name}</b> &mdash; overall
+        ${(e.accuracy*100).toFixed(0)}% <br><small>${pc}</small></div>`;
+    }).join('');
+  }).catch(() => out.textContent = 'Error (did you place the dataset?)');
+};
+
+document.getElementById('btn-defer').onclick = () => {
+  const tau = document.getElementById('tau').value;
+  const ex = document.getElementById('defer-expert').value;
+  const out = document.getElementById('defer-out');
+  busy(out);
+  jget(`{% url 'project3:defer' %}?tau=${tau}&expert=${ex}`).then(d => {
+    out.innerHTML = `<b>System:</b> ${(d.system_accuracy*100).toFixed(2)}%
+      &nbsp;|&nbsp; classifier alone: ${(d.classifier_accuracy*100).toFixed(2)}%
+      &nbsp;|&nbsp; expert alone: ${(d.expert_accuracy*100).toFixed(2)}%
+      <br>coverage (kept): ${(d.coverage*100).toFixed(0)}%
+      &nbsp;|&nbsp; deferral rate: ${(d.deferral_rate*100).toFixed(0)}%`;
+    const img = document.getElementById('defer-plot');
+    img.src = d.plot_url + '?t=' + Date.now(); img.style.display = 'block';
+  });
+};
+
+document.getElementById('btn-active').onclick = () => {
+  const s = document.getElementById('al-strategy').value;
+  const b = document.getElementById('al-budget').value;
+  const out = document.getElementById('active-out');
+  busy(out);
+  jget(`{% url 'project3:active' %}?strategy=${s}&budget=${b}`).then(d => {
+    const r = d.run;
+    out.innerHTML = `<b>${r.strategy}</b>: competence L1 error
+      ${r.final_l1_error} after ${r.n_queries} queries.<br>
+      estimated: [${r.final_competence}] vs true: [${r.true_competence}]
+      <br><small>Comparison: ${Object.entries(d.summary)
+        .map(([k,v]) => `${k}=${v}`).join(' &middot; ')}</small>`;
+    const img = document.getElementById('active-plot');
+    img.src = d.plot_url + '?t=' + Date.now(); img.style.display = 'block';
+  });
+};
+
+document.getElementById('btn-classify').onclick = () => {
+  const txt = encodeURIComponent(document.getElementById('demo-text').value);
+  const out = document.getElementById('demo-out');
+  if (!txt){ out.textContent = 'Enter some text.'; return; }
+  busy(out);
+  jget(`{% url 'project3:classify' %}?text=${txt}`).then(d => {
+    if (d.error){ out.textContent = d.error; return; }
+    const probs = Object.entries(d.proba)
+      .map(([k,v]) => `${k}: ${(v*100).toFixed(0)}%`).join(' &middot; ');
+    out.innerHTML = `<b>Prediction:</b> ${d.pred_class}
+      &nbsp;(conf ${d.clf_confidence})<br>${probs}
+      <br><b>Decision:</b> <span class="p3-decision">${d.decision}</span>
+      &nbsp;(expert expected ${d.expert_expected})`;
+  });
+};
+</script>
+{% endblock %}
+
+{% block script %}{% endblock script %}

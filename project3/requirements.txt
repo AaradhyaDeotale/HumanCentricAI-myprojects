@@ -1,0 +1,9 @@
+django>=5.0
+scikit-learn>=1.3
+numpy
+matplotlib
+reportlab
+# optional, only for the DistilBERT classifier:
+# torch
+# transformers
+# datasets

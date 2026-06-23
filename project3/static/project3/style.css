@@ -1,0 +1,47 @@
+.p3-box { max-width: 900px; }
+.p3-main { padding: 0 24px 24px; max-height: 80vh; overflow-y: auto; }
+.p3-intro { font-size: 0.95rem; color: #333; }
+
+.p3-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin: 14px 0;
+  background: #fafbfc;
+}
+.p3-card h3 { margin: 0 0 10px; color: #275cb2; font-size: 1.05rem; }
+.p3-note { font-size: 0.82rem; color: #666; margin: 0 0 8px; }
+
+.p3-controls {
+  display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+  margin-bottom: 8px;
+}
+.p3-controls label { font-size: 0.85rem; display: flex; gap: 6px; align-items: center; }
+.p3-controls select, .p3-controls input[type="range"] { font-size: 0.85rem; }
+
+.p3-text { flex: 1; min-width: 240px; padding: 6px 8px;
+  border: 1px solid #ccc; border-radius: 4px; }
+
+button {
+  background: #275cb2; color: white; border: none;
+  padding: 7px 16px; border-radius: 5px; cursor: pointer; font-size: 0.85rem;
+}
+button:hover { background: #1d4690; }
+
+.p3-out {
+  font-size: 0.88rem; line-height: 1.5; color: #222;
+  background: white; border-radius: 5px; padding: 8px 10px;
+  min-height: 8px; margin-top: 6px;
+}
+.p3-out:empty { display: none; }
+.p3-expert { padding: 4px 0; border-bottom: 1px dashed #eee; }
+.p3-decision { font-weight: bold; color: #c0392b; }
+.p3-plot { max-width: 100%; margin-top: 10px; border-radius: 6px; }
+.p3-spin { color: #888; font-style: italic; }
+
+.p3-report { text-align: center; margin: 18px 0 4px; }
+.p3-report a {
+  display: inline-block; padding: 9px 20px; background: #27ae60;
+  color: white; text-decoration: none; border-radius: 6px; font-size: 0.9rem;
+}
+.p3-report a:hover { background: #1e8449; }

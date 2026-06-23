@@ -36,6 +36,9 @@ HCAI-PBL/
 ├── home/               # Launch page with group info and project links
 ├── project1/           # Supervised Learning Interface
 ├── project2/           # Explainability
+├── project3/           # Active Learning for Learning-to-Defer
+│   └── ml/             # Framework-agnostic ML core
+├── data/               # AG News CSVs (train.csv, test.csv)
 ├── pbl/                # Django project settings and root URLs
 ├── static/             # Global CSS
 ├── manage.py
@@ -96,13 +99,68 @@ An interactive explainability dashboard built on the [Palmer Penguins dataset](h
 
 ---
 
-## API Endpoints (Project 2)
+## Project 3 — Active Learning for Learning-to-Defer
+
+**URL:** `/project3/`
+
+A topic classifier for the **AG News** dataset that collaborates with a simulated human expert via a learning-to-defer policy, and discovers expert competence through active learning.
+
+### Features
+
+#### Task 1 — Baseline Classifier
+- **TF-IDF + Logistic Regression** pipeline (fast, CPU-only, default)
+- **DistilBERT** drop-in alternative (requires `torch` + `transformers`)
+- Reports test accuracy on up to 20k training samples
+
+#### Task 2 — Simulated Expert Team
+- Multiple experts with localised, class-dependent competence profiles
+- Per-class and overall accuracy reported for each expert
+
+#### Task 3 — Deferral Policy
+- Competence-aware threshold τ: defer to expert when expected expert accuracy exceeds classifier confidence
+- System accuracy and coverage plotted against τ; curve downloadable as PNG
+
+#### Task 4 — Active Learning
+- Three query strategies: **random**, **uncertainty sampling**, **competence-gap**
+- Discovers the expert's competence profile from a small query budget
+- Convergence curves (L1 competence error vs. #queries) compared across strategies
+
+#### Live Demo
+- Enter any text snippet to see the classifier's predicted class, confidence, and defer/predict decision
+- Downloadable PDF report summarising all four tasks
+
+### ML Core (`project3/ml/`)
+
+| Module | Purpose |
+|--------|---------|
+| `data.py` | Loads AG News from local CSVs or HuggingFace |
+| `classifiers.py` | TfidfLogReg and DistilBertClassifier |
+| `expert.py` | Simulated experts with configurable competence |
+| `defer.py` | Competence estimation and deferral system |
+| `active.py` | Active learning loop and strategy implementations |
+
+---
+
+## API Endpoints
+
+### Project 2
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/project2/api/model/` | Returns model info for given `model_type` and `lambda` |
 | GET | `/project2/api/feature-effect/` | Returns PDP + ALE data for a given feature |
 | POST | `/project2/api/counterfactuals/` | Returns counterfactual examples for a given input point |
+
+### Project 3
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/project3/` | Main interface (classifier selection, task results, live demo) |
+| GET | `/project3/api/task2/` | Expert accuracy report |
+| GET | `/project3/api/task3/` | Deferral result for given τ and expert |
+| GET | `/project3/api/task4/` | Active learning results for given strategy |
+| POST | `/project3/api/classify/` | Classify a text snippet and return defer decision |
+| GET | `/project3/report/` | Download the PDF report |
 
 ---
 
@@ -114,7 +172,9 @@ An interactive explainability dashboard built on the [Palmer Penguins dataset](h
 | ML | scikit-learn, palmerpenguins |
 | Data | pandas, numpy |
 | Plots | matplotlib / custom JS |
+| Reports | reportlab |
 | Frontend | HTML, CSS, JavaScript |
+| Optional | torch, transformers (DistilBERT classifier) |
 
 ---
 
