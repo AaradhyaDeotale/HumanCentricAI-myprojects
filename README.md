@@ -1,4 +1,4 @@
-# Human-Centric Artificial Intelligence — Project Portfolio
+# Human-Centric Artificial Intelligence - Project Portfolio
 
 A Django-based web application developed for the *Human-Centric Artificial Intelligence* course at TUHH (SoSe 2026). The project bundles multiple interactive machine learning apps under a single launch page, each focusing on human-facing aspects of ML systems.
 
@@ -47,7 +47,7 @@ HCAI-PBL/
 
 ---
 
-## Project 1 — Supervised Learning Interface
+## Project 1 - Supervised Learning Interface
 
 **URL:** `/project1/`
 
@@ -55,8 +55,8 @@ An end-to-end interface for supervised machine learning on tabular CSV data.
 
 ### Features
 
-- **Data Upload** — Upload any CSV file where the first row contains feature names and the last column is the target label
-- **Data Visualization** — Scatter plots of selected feature pairs, color-coded by class label
+- **Data Upload** - Upload any CSV file where the first row contains feature names and the last column is the target label
+- **Data Visualization** - Scatter plots of selected feature pairs, color-coded by class label
 - **Model Training Pipeline:**
   - Choose a ML algorithm (e.g. Decision Tree, K-Nearest Neighbours, etc.)
   - Configure train/test split ratio
@@ -66,11 +66,11 @@ An end-to-end interface for supervised machine learning on tabular CSV data.
 
 ### Example Dataset
 
-The [Iris dataset](https://en.wikipedia.org/wiki/Iris_flower_data_set) is provided (`iris.csv`) — 150 samples, 4 features, 3 species classes.
+The [Iris dataset](https://en.wikipedia.org/wiki/Iris_flower_data_set) is provided (`iris.csv`) - 150 samples, 4 features, 3 species classes.
 
 ---
 
-## Project 2 — Explainability
+## Project 2 - Explainability
 
 **URL:** `/project2/`
 
@@ -81,7 +81,7 @@ An interactive explainability dashboard built on the [Palmer Penguins dataset](h
 #### Model Interpretability
 - Fit a **Decision Tree** classifier and visualize the full tree structure
 - Display test accuracy and number of leaves
-- **λ slider** — interactively trade off accuracy vs. model complexity; the interface always shows the model minimizing `acc_test + λ · Ω(f)`
+- **λ slider** - interactively trade off accuracy vs. model complexity; the interface always shows the model minimizing `acc_test + λ · Ω(f)`
 - Same interface for **Logistic Regression** with an appropriate complexity measure
 
 #### Counterfactual Explanations (`/project2/api/counterfactuals/`)
@@ -93,13 +93,13 @@ An interactive explainability dashboard built on the [Palmer Penguins dataset](h
 #### Feature Effect Plots (`/project2/api/feature-effect/`)
 - Select any of the four numerical features: `bill_length_mm`, `bill_depth_mm`, `flipper_length_mm`, `body_mass_g`
 - Displays both a **PDP** (Partial Dependence Plot) and an **ALE** (Accumulated Local Effects) plot
-- Each plot shows three curves — one per species
+- Each plot shows three curves - one per species
 - PDP and ALE computation implemented from scratch (no external library)
 - Linked to the currently selected model type and λ value
 
 ---
 
-## Project 3 — Active Learning for Learning-to-Defer
+## Project 3 - Active Learning for Learning-to-Defer
 
 **URL:** `/project3/`
 
@@ -107,20 +107,20 @@ A topic classifier for the **AG News** dataset that collaborates with a simulate
 
 ### Features
 
-#### Task 1 — Baseline Classifier
+#### Task 1 - Baseline Classifier
 - **TF-IDF + Logistic Regression** pipeline (fast, CPU-only, default)
 - **DistilBERT** drop-in alternative (requires `torch` + `transformers`)
 - Reports test accuracy on up to 20k training samples
 
-#### Task 2 — Simulated Expert Team
+#### Task 2 - Simulated Expert Team
 - Multiple experts with localised, class-dependent competence profiles
 - Per-class and overall accuracy reported for each expert
 
-#### Task 3 — Deferral Policy
+#### Task 3 - Deferral Policy
 - Competence-aware threshold τ: defer to expert when expected expert accuracy exceeds classifier confidence
 - System accuracy and coverage plotted against τ; curve downloadable as PNG
 
-#### Task 4 — Active Learning
+#### Task 4 - Active Learning
 - Three query strategies: **random**, **uncertainty sampling**, **competence-gap**
 - Discovers the expert's competence profile from a small query budget
 - Convergence curves (L1 competence error vs. #queries) compared across strategies
@@ -181,4 +181,4 @@ A topic classifier for the **AG News** dataset that collaborates with a simulate
 ## Course
 
 **Human-Centric Artificial Intelligence**
-Hamburg University of Technology (TUHH) — SoSe 2026
+Hamburg University of Technology (TUHH) - SoSe 2026
