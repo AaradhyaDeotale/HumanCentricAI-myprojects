@@ -89,6 +89,37 @@
       <img id="active-plot" class="p3-plot" style="display:none">
     </section>
 
+    <!-- TASK 5 (optional) -->
+    <section class="p3-card">
+      <h3>Task 5 (optional) &mdash; Be the expert</h3>
+      <p class="p3-note">
+        Same active-learning loop as Task 4, but <em>you</em> answer the queries
+        instead of the simulated expert. The strategy below picks which
+        article to show you next; read it, guess its topic, and the system
+        learns your per-class reliability as you go.
+      </p>
+
+      <div class="p3-controls">
+        <label>Query strategy:
+          <select id="human-strategy">
+            <option value="competence_gap">Competence gap</option>
+            <option value="clf_uncertain">Classifier uncertainty</option>
+            <option value="random">Random</option>
+          </select>
+        </label>
+        <button id="btn-human-start">Start session</button>
+        <button id="btn-human-finish" style="display:none">Finish &amp; save</button>
+      </div>
+
+      <div id="human-session" style="display:none">
+        <div class="p3-human-article" id="human-article"></div>
+        <div class="p3-controls p3-human-choices" id="human-choices"></div>
+        <div id="human-feedback" class="p3-out"></div>
+        <div id="human-progress" class="p3-note"></div>
+      </div>
+      <div id="human-summary" class="p3-out"></div>
+    </section>
+
     <!-- DEMO -->
     <section class="p3-card">
       <h3>Try it &mdash; classify one article</h3>
@@ -240,6 +271,68 @@ document.getElementById('btn-classify').onclick = () => {
       &nbsp;(conf ${d.clf_confidence})<br>${probs}
       <br><b>Decision:</b> <span class="p3-decision">${d.decision}</span>
       &nbsp;(expert expected ${d.expert_expected})`;
+  });
+};
+
+// ---- Task 5: be the expert ---------------------------------------------
+let humanClassNames = [];
+
+function renderHumanQuery(d){
+  const artEl = document.getElementById('human-article');
+  const choicesEl = document.getElementById('human-choices');
+  const progEl = document.getElementById('human-progress');
+
+  if (d.done || !d.text){
+    artEl.innerHTML = '<em>Pool exhausted &mdash; no more examples to query.</em>';
+    choicesEl.innerHTML = '';
+    progEl.textContent = '';
+    return;
+  }
+  artEl.textContent = d.text;
+  choicesEl.innerHTML = humanClassNames.map((name, i) =>
+    `<button type="button" class="p3-human-btn" data-label="${i}">${name}</button>`).join('');
+  choicesEl.querySelectorAll('button').forEach(btn => {
+    btn.onclick = () => submitHumanAnswer(+btn.dataset.label);
+  });
+  const accBit = d.overall_accuracy != null
+    ? ` &middot; your accuracy so far: ${(d.overall_accuracy * 100).toFixed(1)}%` : '';
+  progEl.innerHTML = `Queried ${d.n_queried} so far${accBit}`;
+}
+
+document.getElementById('btn-human-start').onclick = () => {
+  const strategy = document.getElementById('human-strategy').value;
+  document.getElementById('human-summary').textContent = '';
+  document.getElementById('human-feedback').innerHTML = '';
+  jget(`{% url 'project3:human_start' %}?strategy=${strategy}`).then(d => {
+    humanClassNames = d.class_names;
+    document.getElementById('human-session').style.display = 'block';
+    document.getElementById('btn-human-finish').style.display = 'inline-block';
+    renderHumanQuery(d);
+  });
+};
+
+function submitHumanAnswer(label){
+  jget(`{% url 'project3:human_answer' %}?label=${label}`).then(d => {
+    const fb = document.getElementById('human-feedback');
+    if (d.error){ fb.textContent = d.error; return; }
+    fb.innerHTML = d.correct
+      ? `<span class="p3-human-ok">&#10003; Correct!</span> It was <b>${d.true_label}</b>.`
+      : `<span class="p3-human-bad">&#10007; Not quite.</span> You said <b>${d.your_label}</b>, it was <b>${d.true_label}</b>.`;
+    renderHumanQuery(d);
+  });
+}
+
+document.getElementById('btn-human-finish').onclick = () => {
+  jget(`{% url 'project3:human_finish' %}`).then(d => {
+    const out = document.getElementById('human-summary');
+    if (d.error){ out.textContent = d.error; return; }
+    const s = d.summary;
+    out.innerHTML = `<b>Session saved:</b> ${s.n_queries} queries &middot; overall accuracy ` +
+      `${(s.overall_accuracy * 100).toFixed(1)}% &middot; strategy: ${s.strategy}<br>` +
+      `Per-class competence learned about you: [${s.competence_mean.join(', ')}]`;
+    document.getElementById('human-session').style.display = 'none';
+    document.getElementById('btn-human-finish').style.display = 'none';
+    if (d.history) renderHistory(d.history);
   });
 };
 </script>

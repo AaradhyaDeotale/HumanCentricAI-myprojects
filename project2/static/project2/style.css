@@ -250,3 +250,10 @@ input[type="range"]#lambda-slider {
 .p2-history-best { background: #eef6ee; }
 .p2-history-best td { font-weight: 700; }
 .p2-history-empty { color: #8090ab; font-style: italic; }
+
+/* brief highlight on the row just recorded, so a click has visible proof */
+.p2-history-flash { animation: p2-flash 1.5s ease-out; }
+@keyframes p2-flash {
+    0%   { background: #ffe9b3; }
+    100% { background: transparent; }
+}

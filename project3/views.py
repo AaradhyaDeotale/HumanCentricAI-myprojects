@@ -186,6 +186,59 @@ def classify(request):
     return JsonResponse(services.classify_text(state, text))
 
 
+def _session_key(request):
+    """Django only assigns a session key once something is stored in it."""
+    if not request.session.session_key:
+        request.session.save()
+    return request.session.session_key
+
+
+def human_start(request):
+    """Task 5 (optional): begin an interactive session where the visitor
+    plays the expert. Returns the first query chosen by the active-learning
+    strategy."""
+    state = services.get_state()
+    strategy = request.GET.get("strategy", "competence_gap")
+    result = services.human_start(state, _session_key(request), strategy=strategy)
+    result["class_names"] = services.CLASS_NAMES
+    return JsonResponse(result)
+
+
+def human_answer(request):
+    """Task 5: grade the visitor's answer to the current query and return
+    the next one."""
+    state = services.get_state()
+    try:
+        label = int(request.GET.get("label"))
+    except (TypeError, ValueError):
+        return JsonResponse({"error": "invalid label"}, status=400)
+
+    result = services.human_answer(state, _session_key(request), label)
+    if result is None:
+        return JsonResponse(
+            {"error": "No active session -- click “Start” first."},
+            status=400)
+    return JsonResponse(result)
+
+
+def human_finish(request):
+    """Task 5: end the session, record it to the run history, and return
+    the final summary."""
+    state = services.get_state()
+    result = services.human_finish(state, _session_key(request))
+    if result is None:
+        return JsonResponse({"error": "Nothing to finish yet."}, status=400)
+
+    ActiveLearningRun.objects.create(
+        model=_latest_trained_model(state),
+        strategy=f"human:{result['strategy']}",
+        budget=result["n_queries"],
+        final_l1_error=round(1 - result["overall_accuracy"], 4),
+        history_json=json.dumps(result["history"]),
+    )
+    return JsonResponse({"summary": result, "history": _history_payload()})
+
+
 def report(request):
     """Generate the PDF report on demand and serve it for download."""
     state = services.get_state()

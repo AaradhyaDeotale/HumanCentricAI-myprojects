@@ -121,6 +121,18 @@ def build_report(state, services):
     ]))
     story.append(t2)
 
+    # Task 5 (optional)
+    H("Task 5 (optional) &mdash; Active learning with a human expert")
+    P("The project interface includes a &ldquo;Be the expert&rdquo; panel that "
+      "runs the exact Task-4 loop live: the chosen acquisition strategy "
+      "(competence-gap, classifier-uncertainty, or random) selects the next "
+      "training article, the visitor reads it and picks a topic, and the "
+      "answer is graded against the true label to update a per-class "
+      "Beta-posterior competence estimate &mdash; the same estimator used for "
+      "the simulated experts above, now fed by a real person instead of "
+      "<code>ClassSpecialistExpert</code>. Each finished session is recorded "
+      "to the run history as a <code>human:&lt;strategy&gt;</code> entry.")
+
     H("Conclusion")
     P("The experiments show a working human-AI team: a strong baseline "
       "classifier, imperfect experts with localised skill, a deferral "

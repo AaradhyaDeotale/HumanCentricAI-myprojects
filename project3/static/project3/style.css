@@ -64,3 +64,17 @@ button:hover { background: #1d4690; }
 .p3-hist-best { background: #eef6ee; }
 .p3-hist-best td { font-weight: 700; }
 .p3-hist-empty { color: #999; font-style: italic; }
+
+/* ---- Task 5: be the expert ---- */
+.p3-human-article {
+  background: white; border: 1px solid #e2e9f5; border-radius: 6px;
+  padding: 12px 14px; margin: 8px 0; font-size: 0.9rem; line-height: 1.5;
+  color: #222;
+}
+.p3-human-choices { margin-bottom: 6px; }
+.p3-human-btn {
+  background: #eef2fb; color: #275cb2; border: 1px solid #cfd9f0;
+}
+.p3-human-btn:hover { background: #275cb2; color: white; }
+.p3-human-ok { font-weight: 700; color: #1e8449; }
+.p3-human-bad { font-weight: 700; color: #c0392b; }

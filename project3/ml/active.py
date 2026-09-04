@@ -58,6 +58,12 @@ class CompetenceEstimator:
         return (a * b) / ((a + b) ** 2 * (a + b + 1))
 
 
+def pick_queries(strategy, pool_idx, proba_pool, comp, rng, batch=1):
+    """Public entry point for `_acquire`, used by both the simulated-expert
+    loop below and the human-in-the-loop session (Task 5)."""
+    return _acquire(strategy, pool_idx, proba_pool, comp, rng, batch)
+
+
 def _acquire(strategy, pool_idx, proba_pool, comp, rng, batch):
     if strategy == "random":
         return list(rng.choice(pool_idx, size=min(batch, len(pool_idx)),

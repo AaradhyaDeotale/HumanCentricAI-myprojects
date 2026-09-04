@@ -29,12 +29,20 @@ from .ml.classifiers import build_classifier
 from .ml.expert import default_expert_team, evaluate_expert
 from .ml.defer import (estimate_expert_competence, DeferralSystem,
                        evaluate_system)
-from .ml.active import run_active_learning, competence_error
+from .ml.active import run_active_learning, competence_error, CompetenceEstimator, pick_queries
 
 _LOCK = threading.Lock()
 _CACHE = {}     # config_key -> dict(clf, train_ds, test_ds, experts, ...)
 
 N_CLASSES = len(CLASS_NAMES)
+
+# Task 5: interactive sessions where a real user plays the expert. Kept
+# in-memory, keyed by the visitor's Django session key -- same pattern as
+# the classifier cache above (fine for a single-process dev server; a real
+# deployment would persist this server-side too, e.g. in the DB or cache).
+_HUMAN_LOCK = threading.Lock()
+_HUMAN_SESSIONS = {}
+HUMAN_POOL_CAP = 3000
 
 
 def _data_dir():
@@ -212,4 +220,122 @@ def classify_text(state, text, expert_index=0):
         "clf_confidence": round(clf_conf, 3),
         "expert_expected": round(exp_expected, 3),
         "decision": "DEFER to expert" if defer else "PREDICT with model",
+    }
+
+
+# ---------- Task 5 (optional): human-in-the-loop active learning ----------
+#
+# Same setting as Task 4 -- an active-learning strategy picks which training
+# example to query next -- except the "expert" answering is now the actual
+# visitor, not a ClassSpecialistExpert. We still know the true label of the
+# queried example (it comes from the labelled training set), so we can grade
+# the visitor's answer and update a CompetenceEstimator exactly as Task 4
+# does, only fed by real human answers instead of `expert.query(...)`.
+
+
+def _human_pick_next(sess, state):
+    """Choose the next unqueried pool example via the session's strategy."""
+    train_ds = state["train_ds"]
+    remaining = [i for i in range(len(sess["pool_idx"]))
+                if i not in sess["queried_local"]]
+    if not remaining:
+        sess["pending_local"] = None
+        return {"done": True, "text": None}
+
+    remaining = np.array(remaining)
+    proba_pool = sess["proba_all"][remaining]
+    picks = pick_queries(sess["strategy"], list(remaining), proba_pool,
+                         sess["comp"], sess["rng"], batch=1)
+    local = picks[0]
+    sess["pending_local"] = local
+    ds_idx = int(sess["pool_idx"][local])
+    return {
+        "done": False,
+        "text": train_ds.texts[ds_idx][:700],
+        "n_queried": len(sess["queried_local"]),
+        "pool_remaining": int(len(remaining) - 1),
+    }
+
+
+def human_start(state, session_key, strategy="competence_gap", seed=0):
+    """Begin (or restart) an interactive Task-5 session for this visitor."""
+    if strategy not in ("random", "clf_uncertain", "competence_gap"):
+        strategy = "competence_gap"
+
+    train_ds = state["train_ds"]
+    rng = np.random.default_rng(seed)
+    pool_size = min(HUMAN_POOL_CAP, len(train_ds))
+    pool_idx = rng.choice(len(train_ds), size=pool_size, replace=False)
+    # Pre-compute once: subsequent queries only index into this array, so
+    # picking the next point is instant instead of re-running the classifier.
+    proba_all = state["clf"].predict_proba([train_ds.texts[i] for i in pool_idx])
+
+    sess = {
+        "pool_idx": pool_idx,
+        "proba_all": proba_all,
+        "queried_local": set(),
+        "comp": CompetenceEstimator(N_CLASSES),
+        "strategy": strategy,
+        "history": [],
+        "correct": 0,
+        "total": 0,
+        "pending_local": None,
+        "rng": np.random.default_rng(seed + 1),
+    }
+    with _HUMAN_LOCK:
+        _HUMAN_SESSIONS[session_key] = sess
+
+    result = _human_pick_next(sess, state)
+    result["strategy"] = strategy
+    result["n_queried"] = 0
+    result["overall_accuracy"] = None
+    result["competence_mean"] = sess["comp"].mean().tolist()
+    return result
+
+
+def human_answer(state, session_key, label):
+    """Grade the visitor's answer to the pending query, then pick the next one."""
+    sess = _HUMAN_SESSIONS.get(session_key)
+    if sess is None or sess["pending_local"] is None:
+        return None
+
+    train_ds = state["train_ds"]
+    local = sess["pending_local"]
+    ds_idx = int(sess["pool_idx"][local])
+    true_label = train_ds.labels[ds_idx]
+
+    correct = int(label == true_label)
+    sess["comp"].update(true_label, correct)
+    sess["queried_local"].add(local)
+    sess["correct"] += correct
+    sess["total"] += 1
+    sess["history"].append({
+        "n_queries": sess["total"],
+        "competence_mean": sess["comp"].mean().tolist(),
+    })
+
+    result = {
+        "correct": bool(correct),
+        "true_label": CLASS_NAMES[true_label],
+        "your_label": CLASS_NAMES[label],
+        "n_queries": sess["total"],
+        "overall_accuracy": round(sess["correct"] / sess["total"], 4),
+        "competence_mean": [round(float(x), 3) for x in sess["comp"].mean()],
+        "strategy": sess["strategy"],
+    }
+    result.update(_human_pick_next(sess, state))
+    return result
+
+
+def human_finish(state, session_key):
+    """End the session and return a summary (for recording + display)."""
+    sess = _HUMAN_SESSIONS.pop(session_key, None)
+    if sess is None or sess["total"] == 0:
+        return None
+    return {
+        "strategy": sess["strategy"],
+        "n_queries": sess["total"],
+        "overall_accuracy": round(sess["correct"] / sess["total"], 4),
+        "competence_mean": [round(float(x), 3) for x in sess["comp"].mean()],
+        "history": sess["history"],
     }

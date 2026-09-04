@@ -530,14 +530,30 @@
             .then((payload) => {
                 renderHistory(payload);
                 btn.innerHTML = "✓ Recorded";
+                // The history table lives at the bottom of a long page — jump to
+                // it so the new row is actually visible, not just appended
+                // off-screen.
+                const row = document.querySelector(
+                    '#history-body tr[data-run-id="' + payload.recorded.id + '"]'
+                );
+                (row || $("history-table")).scrollIntoView({
+                    behavior: "smooth",
+                    block: "center",
+                });
+                if (row) {
+                    row.classList.add("p2-history-flash");
+                    setTimeout(() => row.classList.remove("p2-history-flash"), 1500);
+                }
                 setTimeout(() => {
                     btn.innerHTML = original;
                     btn.disabled = false;
                 }, 1200);
             })
-            .catch(() => {
+            .catch((err) => {
                 btn.innerHTML = original;
                 btn.disabled = false;
+                console.error("Recording model failed:", err);
+                window.alert("Could not record this model (see console for details).");
             });
     }
 
