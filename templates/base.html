@@ -10,6 +10,9 @@
         <style></style>
     </head>
     <body>
+        {% block home_link %}
+        <a href="{% url 'home:index' %}" class="home-link">&#8592;&nbsp;Project Hub</a>
+        {% endblock %}
         <div class="grid-parent">
             {% block content %}
             {%  endblock %}

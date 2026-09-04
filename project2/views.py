@@ -13,6 +13,46 @@ from django.shortcuts import render
 from django.views.decorators.http import require_GET, require_POST
 
 from . import ml
+from .models import ModelSelectionRun
+
+
+# How many recorded runs to show in the history table.
+HISTORY_LIMIT = 15
+
+
+def _fmt_hyperparam(hp):
+    """Turn ml.py's {"max_leaf_nodes": 6} into a compact "max_leaf_nodes=6"."""
+    if not hp:
+        return ""
+    return ", ".join(f"{k}={v:g}" if isinstance(v, float) else f"{k}={v}"
+                     for k, v in hp.items())
+
+
+def _run_dict(run):
+    """Serialise a ModelSelectionRun row for JSON / template use."""
+    return {
+        "id": run.id,
+        "created_at": run.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+        "model_type": run.model_type,
+        "model_label": run.get_model_type_display(),
+        "lam": round(run.lam, 4),
+        "omega": run.omega,
+        "omega_label": run.omega_label,
+        "hyperparam": run.hyperparam,
+        "acc_test": round(run.acc_test, 4),
+        "acc_train": round(run.acc_train, 4),
+    }
+
+
+def _history_payload():
+    """Recent recorded runs + the best one (highest test accuracy)."""
+    runs = list(ModelSelectionRun.objects.all()[:HISTORY_LIMIT])
+    best = max(runs, key=lambda r: r.acc_test) if runs else None
+    return {
+        "history": [_run_dict(r) for r in runs],
+        "best_id": best.id if best else None,
+        "total_runs": ModelSelectionRun.objects.count(),
+    }
 
 
 # --------------------------------------------------------------------------- #
@@ -30,6 +70,7 @@ def index(request):
         ],
         "n_samples": len(data["df"]),
     }
+    context.update(_history_payload())
     return render(request, "project2/index.html", context)
 
 
@@ -217,3 +258,48 @@ def api_feature_effect(request):
             "ale": ale,
         }
     )
+
+
+# --------------------------------------------------------------------------- #
+# API: recorded run history (persisted with the Django ORM)
+# --------------------------------------------------------------------------- #
+
+
+@require_POST
+def api_record(request):
+    """Persist the currently selected model as a run and return the history."""
+    try:
+        body = json.loads(request.body.decode("utf-8"))
+    except (ValueError, UnicodeDecodeError):
+        return HttpResponseBadRequest("Invalid JSON body")
+
+    model_type = body.get("model_type", "tree")
+    if model_type not in ("tree", "logistic"):
+        return HttpResponseBadRequest("Bad model_type")
+
+    lo, hi = ml.lambda_range(model_type)
+    try:
+        lam = max(lo, min(hi, float(body.get("lambda", 0.0))))
+    except (TypeError, ValueError):
+        return HttpResponseBadRequest("Bad lambda")
+
+    best, _ = ml.select_by_lambda(model_type, lam)
+    run = ModelSelectionRun.objects.create(
+        model_type=model_type,
+        lam=lam,
+        omega=best["omega"],
+        omega_label=best["omega_label"],
+        hyperparam=_fmt_hyperparam(best["hyperparam"]),
+        acc_test=best["acc_test"],
+        acc_train=best["acc_train"],
+    )
+
+    payload = _history_payload()
+    payload["recorded"] = _run_dict(run)
+    return JsonResponse(payload)
+
+
+@require_GET
+def api_history(request):
+    """Return the recorded-run history without changing anything."""
+    return JsonResponse(_history_payload())

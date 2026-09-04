@@ -45,3 +45,22 @@ button:hover { background: #1d4690; }
   color: white; text-decoration: none; border-radius: 6px; font-size: 0.9rem;
 }
 .p3-report a:hover { background: #1e8449; }
+
+/* ---- run history ---- */
+.p3-hist-note { font-weight: normal; font-size: 0.78rem; color: #888; }
+.p3-hist-h4 {
+  margin: 14px 0 4px; font-size: 0.85rem; color: #444; font-weight: 600;
+}
+.p3-hist-table {
+  width: 100%; border-collapse: collapse; font-size: 0.8rem;
+}
+.p3-hist-table th {
+  text-align: left; color: #7a8aa5; font-weight: 600;
+  border-bottom: 1px solid #e2e9f5; padding: 4px 6px;
+}
+.p3-hist-table td {
+  padding: 4px 6px; border-bottom: 1px solid #f0f4fa; color: #333;
+}
+.p3-hist-best { background: #eef6ee; }
+.p3-hist-best td { font-weight: 700; }
+.p3-hist-empty { color: #999; font-style: italic; }

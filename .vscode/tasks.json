@@ -1,0 +1,28 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Setup Python venv",
+      "detail": "Create venv/ if missing and install requirements.txt",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/.vscode/setup-venv.ps1"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "focus": false,
+        "panel": "dedicated",
+        "clear": true
+      },
+      "runOptions": {
+        "runOn": "folderOpen"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

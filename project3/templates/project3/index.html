@@ -100,6 +100,33 @@
       <div id="demo-out" class="p3-out"></div>
     </section>
 
+    <!-- RUN HISTORY -->
+    <section class="p3-card">
+      <h3>Run history <span class="p3-hist-note">saved to the database &middot;
+        refreshes after each run above</span></h3>
+
+      <h4 class="p3-hist-h4">Task 1 &mdash; baseline trainings
+        (<span id="hist-count-train">0</span>)</h4>
+      <table class="p3-hist-table">
+        <thead><tr><th>When</th><th>Model</th><th>Train size</th><th>Test accuracy</th></tr></thead>
+        <tbody id="hist-train"><tr><td colspan="4" class="p3-hist-empty">none yet</td></tr></tbody>
+      </table>
+
+      <h4 class="p3-hist-h4">Task 3 &mdash; deferral runs
+        (<span id="hist-count-defer">0</span>)</h4>
+      <table class="p3-hist-table">
+        <thead><tr><th>When</th><th>&tau;</th><th>System</th><th>Classifier</th><th>Expert</th><th>Coverage</th></tr></thead>
+        <tbody id="hist-defer"><tr><td colspan="6" class="p3-hist-empty">none yet</td></tr></tbody>
+      </table>
+
+      <h4 class="p3-hist-h4">Task 4 &mdash; active-learning runs
+        (<span id="hist-count-active">0</span>)</h4>
+      <table class="p3-hist-table">
+        <thead><tr><th>When</th><th>Strategy</th><th>Budget</th><th>Final L1 error</th></tr></thead>
+        <tbody id="hist-active"><tr><td colspan="4" class="p3-hist-empty">none yet</td></tr></tbody>
+      </table>
+    </section>
+
     <div class="p3-report">
       <a href="{% url 'project3:report' %}">&#128196; Download PDF report</a>
     </div>
@@ -114,6 +141,36 @@ function jget(url){ return fetch(url).then(r => r.json()); }
 document.getElementById('tau').addEventListener('input', e => {
   document.getElementById('tau-val').textContent = (+e.target.value).toFixed(2);
 });
+
+// ---- run history -------------------------------------------------------
+function pct(x){ return (x * 100).toFixed(2) + '%'; }
+
+function histRows(tbody, rows, cols, cells){
+  if (!rows.length){
+    tbody.innerHTML = `<tr><td colspan="${cols}" class="p3-hist-empty">none yet</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rows.map(r =>
+    `<tr class="${r.best ? 'p3-hist-best' : ''}">${cells(r)}</tr>`).join('');
+}
+
+function renderHistory(h){
+  document.getElementById('hist-count-train').textContent = h.counts.trainings;
+  document.getElementById('hist-count-defer').textContent = h.counts.deferrals;
+  document.getElementById('hist-count-active').textContent = h.counts.active_runs;
+
+  histRows(document.getElementById('hist-train'), h.trainings, 4, r =>
+    `<td>${r.when}</td><td>${r.kind}</td><td>${r.n_train.toLocaleString()}</td><td>${pct(r.test_accuracy)}</td>`);
+
+  histRows(document.getElementById('hist-defer'), h.deferrals, 6, r =>
+    `<td>${r.when}</td><td>${r.tau.toFixed(2)}</td><td>${pct(r.system_accuracy)}</td>` +
+    `<td>${pct(r.classifier_accuracy)}</td><td>${pct(r.expert_accuracy)}</td><td>${pct(r.coverage)}</td>`);
+
+  histRows(document.getElementById('hist-active'), h.active_runs, 4, r =>
+    `<td>${r.when}</td><td>${r.strategy}</td><td>${r.budget}</td><td>${r.final_l1_error}</td>`);
+}
+
+jget("{% url 'project3:history' %}").then(renderHistory).catch(() => {});
 
 document.getElementById('btn-train').onclick = () => {
   const kind = document.getElementById('kind').value;
@@ -131,6 +188,7 @@ document.getElementById('btn-train').onclick = () => {
       return `<div class="p3-expert"><b>${e.name}</b> &mdash; overall
         ${(e.accuracy*100).toFixed(0)}% <br><small>${pc}</small></div>`;
     }).join('');
+    if (d.history) renderHistory(d.history);
   }).catch(() => out.textContent = 'Error (did you place the dataset?)');
 };
 
@@ -147,6 +205,7 @@ document.getElementById('btn-defer').onclick = () => {
       &nbsp;|&nbsp; deferral rate: ${(d.deferral_rate*100).toFixed(0)}%`;
     const img = document.getElementById('defer-plot');
     img.src = d.plot_url + '?t=' + Date.now(); img.style.display = 'block';
+    if (d.history) renderHistory(d.history);
   });
 };
 
@@ -164,6 +223,7 @@ document.getElementById('btn-active').onclick = () => {
         .map(([k,v]) => `${k}=${v}`).join(' &middot; ')}</small>`;
     const img = document.getElementById('active-plot');
     img.src = d.plot_url + '?t=' + Date.now(); img.style.display = 'block';
+    if (d.history) renderHistory(d.history);
   });
 };
 

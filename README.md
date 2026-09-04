@@ -97,6 +97,10 @@ An interactive explainability dashboard built on the [Palmer Penguins dataset](h
 - PDP and ALE computation implemented from scratch (no external library)
 - Linked to the currently selected model type and λ value
 
+#### Recorded Models (`/project2/api/record/`, `/project2/api/history/`)
+- **"Record this model"** button snapshots the current model type, λ, complexity Ω and train/test accuracy to the database (`ModelSelectionRun` via the Django ORM)
+- History table lists recorded models and highlights the best (highest test accuracy); inspectable in the Django admin
+
 ---
 
 ## Project 3 - Active Learning for Learning-to-Defer
@@ -129,6 +133,10 @@ A topic classifier for the **AG News** dataset that collaborates with a simulate
 - Enter any text snippet to see the classifier's predicted class, confidence, and defer/predict decision
 - Downloadable PDF report summarising all four tasks
 
+#### Run History (`/project3/history/`)
+- Every baseline training (Task 1), deferral run (Task 3) and active-learning run (Task 4) is persisted to the database (`TrainedModel`, `DeferralResult`, `ActiveLearningRun`)
+- On-page history panel refreshes after each run and flags the best result in each category; also inspectable in the Django admin
+
 ### ML Core (`project3/ml/`)
 
 | Module | Purpose |
@@ -150,16 +158,19 @@ A topic classifier for the **AG News** dataset that collaborates with a simulate
 | GET | `/project2/api/model/` | Returns model info for given `model_type` and `lambda` |
 | GET | `/project2/api/feature-effect/` | Returns PDP + ALE data for a given feature |
 | POST | `/project2/api/counterfactuals/` | Returns counterfactual examples for a given input point |
+| POST | `/project2/api/record/` | Persists the current model selection and returns the updated history |
+| GET | `/project2/api/history/` | Returns the recorded-model history |
 
 ### Project 3
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/project3/` | Main interface (classifier selection, task results, live demo) |
-| GET | `/project3/api/task2/` | Expert accuracy report |
-| GET | `/project3/api/task3/` | Deferral result for given τ and expert |
-| GET | `/project3/api/task4/` | Active learning results for given strategy |
-| POST | `/project3/api/classify/` | Classify a text snippet and return defer decision |
+| GET | `/project3/train/` | Train the baseline classifier (Task 1); records a `TrainedModel` |
+| GET | `/project3/defer/` | Deferral result for given τ and expert (Task 3); records a `DeferralResult` |
+| GET | `/project3/active/` | Active learning results for given strategy (Task 4); records an `ActiveLearningRun` |
+| GET | `/project3/classify/` | Classify a text snippet and return the defer decision |
+| GET | `/project3/history/` | Returns the run history for all three tasks |
 | GET | `/project3/report/` | Download the PDF report |
 
 ---

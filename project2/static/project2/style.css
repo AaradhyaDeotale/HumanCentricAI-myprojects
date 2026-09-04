@@ -221,3 +221,32 @@ input[type="range"]#lambda-slider {
 
 /* Plotly tweak: let plots size to container nicely */
 .js-plotly-plot { width: 100% !important; }
+
+/* ---- recorded run history ---- */
+.p2-record-btn {
+    margin-left: auto;
+    align-self: center;
+    white-space: nowrap;
+}
+.p2-history-summary { font-size: 14px; color: #475672; margin: 4px 0 10px; }
+.p2-history-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+.p2-history-table th {
+    text-align: left;
+    color: #7a8aa5;
+    font-weight: 600;
+    border-bottom: 1px solid #e2e9f5;
+    padding: 6px 8px;
+}
+.p2-history-table td {
+    padding: 6px 8px;
+    border-bottom: 1px solid #f0f4fa;
+    color: #33415c;
+}
+.p2-history-table td small { color: #8090ab; }
+.p2-history-best { background: #eef6ee; }
+.p2-history-best td { font-weight: 700; }
+.p2-history-empty { color: #8090ab; font-style: italic; }

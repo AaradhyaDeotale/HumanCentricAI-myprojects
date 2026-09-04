@@ -6,6 +6,9 @@
         <link rel= "stylesheet" href="{% static 'home/style.css'%}">
 {% endblock %}
 
+{# already the hub – no need to link back to itself #}
+{% block home_link %}{% endblock %}
+
 {% block content %}
 
 <div class="box">

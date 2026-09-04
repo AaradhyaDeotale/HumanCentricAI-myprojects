@@ -141,6 +141,9 @@
 
         // counterfactual generate button
         $("cf-run").addEventListener("click", runCounterfactuals);
+
+        // "record this model" button -> persist current selection
+        $("record-run").addEventListener("click", recordRun);
     }
 
     const debouncedRefreshModelAndEffects = debounce(() => {
@@ -509,6 +512,66 @@
             },
             PLOTLY_CONFIG
         );
+    }
+
+    // ----------------------------------------------------------------------
+    // Recorded run history (persisted server-side with the Django ORM)
+    // ----------------------------------------------------------------------
+    function recordRun() {
+        const btn = $("record-run");
+        const original = btn.innerHTML;
+        btn.disabled = true;
+        btn.textContent = "Recording…";
+
+        postJSON(window.P2_URLS.record, {
+            model_type: state.modelType,
+            lambda: state.lambda,
+        })
+            .then((payload) => {
+                renderHistory(payload);
+                btn.innerHTML = "✓ Recorded";
+                setTimeout(() => {
+                    btn.innerHTML = original;
+                    btn.disabled = false;
+                }, 1200);
+            })
+            .catch(() => {
+                btn.innerHTML = original;
+                btn.disabled = false;
+            });
+    }
+
+    function renderHistory(payload) {
+        $("hist-total").textContent = payload.total_runs;
+        const body = $("history-body");
+
+        if (!payload.history.length) {
+            body.innerHTML =
+                '<tr id="history-empty"><td colspan="7" class="p2-history-empty">' +
+                "No models recorded yet.</td></tr>";
+            return;
+        }
+
+        body.innerHTML = payload.history
+            .map((r) => {
+                const best =
+                    r.id === payload.best_id ? ' class="p2-history-best"' : "";
+                const omega = Number.isInteger(r.omega)
+                    ? r.omega
+                    : r.omega.toFixed(2);
+                return (
+                    '<tr data-run-id="' + r.id + '"' + best + ">" +
+                    "<td>" + r.created_at + "</td>" +
+                    "<td>" + r.model_label + "</td>" +
+                    "<td>" + r.lam.toFixed(4) + "</td>" +
+                    "<td>" + omega + " <small>" + r.omega_label + "</small></td>" +
+                    "<td>" + (r.hyperparam || "") + "</td>" +
+                    "<td>" + r.acc_test.toFixed(4) + "</td>" +
+                    "<td>" + r.acc_train.toFixed(4) + "</td>" +
+                    "</tr>"
+                );
+            })
+            .join("");
     }
 
     // go

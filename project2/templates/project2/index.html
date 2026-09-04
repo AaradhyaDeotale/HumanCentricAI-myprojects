@@ -50,6 +50,9 @@
                 <span class="p2-chip-value" id="chip-omega">&ndash;</span></div>
             <div class="p2-chip"><span class="p2-chip-label">Train accuracy</span>
                 <span class="p2-chip-value" id="chip-acc-train">&ndash;</span></div>
+            <button id="record-run" class="p2-btn p2-record-btn" type="button">
+                &#128204; Record this model
+            </button>
         </div>
 
         <!-- ===================== TASK 1 & 2 & 3: MODEL ===================== -->
@@ -123,6 +126,44 @@
             <p class="p2-method-note" id="ale-method-note"></p>
         </section>
 
+        <!-- ===================== RECORDED RUN HISTORY ===================== -->
+        <section class="p2-section">
+            <h2 class="p2-h2">Recorded models
+                <span class="p2-tasknote">persisted with the Django ORM &middot; press
+                    &ldquo;Record this model&rdquo; above to add a row</span></h2>
+
+            <p class="p2-history-summary">
+                Total recorded: <strong id="hist-total">{{ total_runs }}</strong>
+            </p>
+
+            <table class="p2-history-table" id="history-table">
+                <thead>
+                    <tr>
+                        <th>When</th><th>Model</th><th>&lambda;</th>
+                        <th>&Omega;</th><th>Hyperparameter</th>
+                        <th>Test acc</th><th>Train acc</th>
+                    </tr>
+                </thead>
+                <tbody id="history-body">
+                    {% for run in history %}
+                    <tr data-run-id="{{ run.id }}"
+                        {% if run.id == best_id %}class="p2-history-best"{% endif %}>
+                        <td>{{ run.created_at }}</td>
+                        <td>{{ run.model_label }}</td>
+                        <td>{{ run.lam|floatformat:4 }}</td>
+                        <td>{{ run.omega|floatformat:"-2" }} <small>{{ run.omega_label }}</small></td>
+                        <td>{{ run.hyperparam }}</td>
+                        <td>{{ run.acc_test|floatformat:4 }}</td>
+                        <td>{{ run.acc_train|floatformat:4 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr id="history-empty"><td colspan="7" class="p2-history-empty">
+                        No models recorded yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+
     </div>
 </div>
 {% endblock %}
@@ -135,6 +176,8 @@
         model:          "{% url 'project2:api_model' %}",
         counterfactuals:"{% url 'project2:api_counterfactuals' %}",
         featureEffect:  "{% url 'project2:api_feature_effect' %}",
+        record:         "{% url 'project2:api_record' %}",
+        history:        "{% url 'project2:api_history' %}",
     };
     window.P2_CSRF = "{{ csrf_token }}";
     window.P2_CLASSES = {{ classes|safe }};
