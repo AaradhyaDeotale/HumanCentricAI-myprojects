@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'project4/style.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="box p4-box">
+  <div class="title-container">
+    <div class="title">One Last Thing</div>
+  </div>
+
+  <div class="main-text p4-main">
+    <p class="p4-intro">A few questions about your experience with the two tasks.</p>
+
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="p4-likert-row">
+        <label class="p4-q">How difficult was choosing between <strong>pairs</strong> of movies?</label>
+        <div class="p4-likert">
+          {% for i in "12345" %}
+          <label class="p4-likert-opt"><input type="radio" name="pairwise_difficulty" value="{{ i }}" required>{{ i }}</label>
+          {% endfor %}
+        </div>
+        <div class="p4-likert-scale-labels"><span>Very easy</span><span>Very difficult</span></div>
+      </div>
+
+      <div class="p4-likert-row">
+        <label class="p4-q">How difficult was <strong>ranking</strong> a list of ten movies?</label>
+        <div class="p4-likert">
+          {% for i in "12345" %}
+          <label class="p4-likert-opt"><input type="radio" name="ranking_difficulty" value="{{ i }}" required>{{ i }}</label>
+          {% endfor %}
+        </div>
+        <div class="p4-likert-scale-labels"><span>Very easy</span><span>Very difficult</span></div>
+      </div>
+
+      <div class="p4-likert-row">
+        <label class="p4-q">How confident are you that the <strong>pairwise</strong> task reflected your real taste?</label>
+        <div class="p4-likert">
+          {% for i in "12345" %}
+          <label class="p4-likert-opt"><input type="radio" name="pairwise_confidence" value="{{ i }}" required>{{ i }}</label>
+          {% endfor %}
+        </div>
+        <div class="p4-likert-scale-labels"><span>Not confident</span><span>Very confident</span></div>
+      </div>
+
+      <div class="p4-likert-row">
+        <label class="p4-q">How confident are you that the <strong>ranking</strong> task reflected your real taste?</label>
+        <div class="p4-likert">
+          {% for i in "12345" %}
+          <label class="p4-likert-opt"><input type="radio" name="ranking_confidence" value="{{ i }}" required>{{ i }}</label>
+          {% endfor %}
+        </div>
+        <div class="p4-likert-scale-labels"><span>Not confident</span><span>Very confident</span></div>
+      </div>
+
+      <div class="p4-likert-row">
+        <label class="p4-q">Overall, which way of telling us your movie taste did you prefer?</label>
+        <div class="p4-radio-row">
+          <label><input type="radio" name="preferred_method" value="pairwise" required> Comparing pairs of movies</label>
+          <label><input type="radio" name="preferred_method" value="ranking"> Ranking lists of movies</label>
+          <label><input type="radio" name="preferred_method" value="no_preference"> No preference</label>
+        </div>
+      </div>
+
+      <div class="p4-likert-row">
+        <label class="p4-q" for="comments">Anything else you'd like to tell us? (optional)</label>
+        <textarea class="p4-textarea" name="comments" id="comments"></textarea>
+      </div>
+
+      <div class="p4-form-actions">
+        <button type="submit">Finish</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

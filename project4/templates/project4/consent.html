@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'project4/style.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="box p4-box">
+  <div class="title-container">
+    <div class="title">Movie Preference Study</div>
+  </div>
+
+  <div class="main-text p4-main">
+    <div class="p4-card">
+      <h3>What this study is about</h3>
+      <p>
+        We are studying how to quickly learn a new user's movie taste. You
+        will complete two short tasks: choosing between pairs of movies, and
+        ranking short lists of movies from most to least appealing. There
+        are no right or wrong answers &mdash; we are only interested in your
+        personal preferences.
+      </p>
+    </div>
+
+    <div class="p4-card">
+      <h3>What you'll do</h3>
+      <ul>
+        <li>A brief pairwise-choice task and a brief ranking task (order randomized), each with on-screen instructions.</li>
+        <li>A handful of quick final comparisons.</li>
+        <li>A short questionnaire about your experience.</li>
+        <li>Total time: about 8&ndash;10 minutes.</li>
+      </ul>
+    </div>
+
+    <div class="p4-card">
+      <h3>Your privacy</h3>
+      <p>
+        We do not collect your name, email, or any other identifying
+        information. Your browser is assigned an anonymous session
+        identifier used only to link your answers together for analysis.
+        Participation is entirely voluntary: you may close this page at any
+        time without penalty, and there is no way for us to link an
+        abandoned session back to you.
+      </p>
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="p4-consent-check">
+        <input type="checkbox" id="agree" name="agree" required>
+        <label for="agree">I am 18 years of age or older, I have read the information above, and I agree to take part in this study.</label>
+      </div>
+      <div class="p4-form-actions">
+        <button type="submit">Begin the study</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

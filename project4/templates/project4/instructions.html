@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'project4/style.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="box p4-box">
+  <div class="title-container">
+    <div class="title">
+      {% if phase_label == 'pairwise' %}Task: Choose Between Movies
+      {% elif phase_label == 'ranking' %}Task: Rank a List of Movies
+      {% else %}Almost done{% endif %}
+    </div>
+  </div>
+
+  <div class="main-text p4-main">
+    <div class="p4-progress-label">Part {{ phase_number }} of {{ total_phases }}</div>
+
+    <div class="p4-card">
+      {% if phase_label == 'pairwise' %}
+        <h3>How it works</h3>
+        <p>
+          You'll see two movies at a time, described by their title, year,
+          genres, director and cast. Click the one you would rather watch
+          right now. Go with your gut &mdash; there's no need to have seen
+          either movie.
+        </p>
+        <p>You'll do this <strong>{{ n_trials }}</strong> times.</p>
+      {% elif phase_label == 'ranking' %}
+        <h3>How it works</h3>
+        <p>
+          You'll see a list of ten movies. Click them in order, starting
+          with the one you would most like to watch, ending with the one
+          you would least like to watch. A number badge marks the rank you
+          have given each movie so far; use &ldquo;Undo last pick&rdquo; if
+          you change your mind.
+        </p>
+        <p>You'll do this <strong>{{ n_trials }}</strong> time{{ n_trials|pluralize }}.</p>
+      {% else %}
+        <h3>Just a few more</h3>
+        <p>
+          Thanks &mdash; you're nearly finished. A few final quick
+          comparisons, then a short questionnaire.
+        </p>
+      {% endif %}
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="p4-form-actions">
+        <button type="submit">Continue</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'project4/style.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="box p4-box">
+  <div class="title-container">
+    <div class="title">Thank You!</div>
+  </div>
+
+  <div class="main-text p4-main">
+    <p class="p4-intro">
+      Your answers have been recorded. Here's what our preference model
+      learned from you: five movies from the catalogue you weren't shown,
+      ranked highest by your estimated taste.
+    </p>
+
+    <div class="p4-recs">
+      {% for movie in recommendations %}
+      <div class="p4-rec-card">
+        {% include "project4/_movie_card_body.html" with movie=movie %}
+      </div>
+      {% empty %}
+      <p>Not enough responses were recorded to estimate your preferences.</p>
+      {% endfor %}
+    </div>
+
+    {% if n_holdout %}
+    <div class="p4-model-compare">
+      <strong>Out of curiosity:</strong> using only your first-phase answers,
+      a model fit on your <strong>pairwise</strong> choices predicted
+      {% if pairwise_accuracy != None %}{% widthratio pairwise_accuracy 1 100 %}%{% else %}n/a{% endif %}
+      of your {{ n_holdout }} final comparisons correctly, while a model fit
+      on your <strong>rankings</strong> predicted
+      {% if ranking_accuracy != None %}{% widthratio ranking_accuracy 1 100 %}%{% else %}n/a{% endif %}.
+      This is exactly the comparison the study is designed to make &mdash;
+      with real participants, it's averaged over everyone who takes part.
+    </div>
+    {% endif %}
+
+    <div class="p4-card">
+      <h3>Your completion code</h3>
+      <div class="p4-code">{{ completion_code }}</div>
+      <p style="text-align:center; font-size:0.85rem; color:#888;">
+        If you were recruited through a study platform, paste this code
+        there to confirm your participation.
+      </p>
+    </div>
+
+    <div class="p4-form-actions">
+      <a class="p4-btn p4-btn-secondary" href="{% url 'project4:index' %}">Back to Project 4</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,127 @@
+.p4-box { max-width: 960px; }
+.p4-main { padding: 0 24px 28px; max-height: 82vh; overflow-y: auto; }
+.p4-intro { font-size: 0.95rem; color: #333; }
+
+button, .p4-btn {
+  background: #275cb2; color: white; border: none;
+  padding: 9px 18px; border-radius: 6px; cursor: pointer; font-size: 0.9rem;
+  text-decoration: none; display: inline-block;
+}
+button:hover, .p4-btn:hover { background: #1d4690; }
+.p4-btn-secondary { background: #eef2fb; color: #275cb2; border: 1px solid #cfd9f0; }
+.p4-btn-secondary:hover { background: #dbe6fb; }
+
+/* ---- landing page ---- */
+.p4-stats { font-size: 0.82rem; color: #888; text-align: center; margin: 4px 0 18px; }
+.p4-actions {
+  display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;
+  margin: 22px 0 8px;
+}
+.p4-actions .p4-btn { padding: 12px 24px; font-size: 1rem; }
+.p4-design-note {
+  background: #fafbfc; border: 1px solid #e0e0e0; border-radius: 8px;
+  padding: 14px 18px; margin-top: 20px; font-size: 0.85rem; color: #555;
+}
+
+/* ---- progress bar ---- */
+.p4-progress-wrap { margin: 4px 0 18px; }
+.p4-progress-label { font-size: 0.78rem; color: #888; margin-bottom: 4px; text-align: center; }
+.p4-progress-bar { height: 6px; background: #eef2fb; border-radius: 3px; overflow: hidden; }
+.p4-progress-fill { height: 100%; background: #275cb2; border-radius: 3px; }
+
+.p4-error {
+  color: #c0392b; background: #fdecea; border: 1px solid #f5c6c0;
+  border-radius: 6px; padding: 8px 12px; font-size: 0.85rem; margin-bottom: 12px;
+}
+
+/* ---- consent / instructions ---- */
+.p4-card {
+  border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px 20px;
+  margin: 14px 0; background: #fafbfc;
+}
+.p4-card h3 { margin: 0 0 8px; color: #275cb2; font-size: 1rem; }
+.p4-card ul { margin: 6px 0; }
+.p4-consent-check {
+  display: flex; align-items: flex-start; gap: 8px; font-size: 0.88rem;
+  margin: 16px 0; background: white; border: 1px solid #e2e9f5;
+  border-radius: 6px; padding: 12px 14px;
+}
+.p4-consent-check input { margin-top: 3px; }
+.p4-form-actions { text-align: center; margin-top: 16px; }
+
+/* ---- pairwise trial ---- */
+.p4-pair {
+  display: flex; gap: 18px; justify-content: center; flex-wrap: wrap;
+  margin: 10px 0;
+}
+.p4-pick-form { flex: 1; min-width: 240px; max-width: 380px; }
+.p4-card-btn {
+  all: unset; box-sizing: border-box; display: block; width: 100%;
+  cursor: pointer; background: white; border: 2px solid #e2e9f5;
+  border-radius: 10px; padding: 16px; text-align: left;
+}
+.p4-card-btn:hover, .p4-card-btn:focus { border-color: #275cb2; background: #f5f8ff; }
+.p4-movie-title { font-size: 1.05rem; font-weight: 700; color: #222; margin-bottom: 2px; }
+.p4-movie-meta { font-size: 0.8rem; color: #777; margin-bottom: 8px; }
+.p4-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; }
+.p4-tag {
+  font-size: 0.72rem; background: #eef2fb; color: #275cb2; border-radius: 10px;
+  padding: 2px 9px;
+}
+.p4-tag-keyword { background: #f4eefb; color: #7a3fb5; }
+.p4-movie-people { font-size: 0.8rem; color: #555; line-height: 1.4; }
+.p4-vs { align-self: center; font-weight: 700; color: #aaa; font-size: 1rem; }
+
+/* ---- ranking trial ---- */
+.p4-rank-note { font-size: 0.85rem; color: #666; margin-bottom: 10px; }
+.p4-rank-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px; margin-bottom: 14px;
+}
+.p4-rank-card {
+  position: relative; cursor: pointer; background: white; border: 2px solid #e2e9f5;
+  border-radius: 10px; padding: 12px; min-height: 96px;
+}
+.p4-rank-card:hover { border-color: #275cb2; }
+.p4-rank-card.ranked { border-color: #27ae60; background: #f3fbf5; }
+.p4-rank-badge {
+  position: absolute; top: -8px; left: -8px; width: 24px; height: 24px;
+  border-radius: 50%; background: #27ae60; color: white; font-size: 0.78rem;
+  font-weight: 700; display: flex; align-items: center; justify-content: center;
+}
+.p4-rank-controls {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 8px;
+}
+.p4-rank-hint { font-size: 0.8rem; color: #888; }
+
+/* ---- likert / questionnaire ---- */
+.p4-likert-row { margin: 14px 0; }
+.p4-likert-row label.p4-q { display: block; font-size: 0.9rem; margin-bottom: 6px; color: #333; }
+.p4-likert { display: flex; gap: 4px; align-items: center; }
+.p4-likert-opt {
+  display: flex; flex-direction: column; align-items: center; font-size: 0.72rem;
+  color: #888; gap: 3px; flex: 1;
+}
+.p4-likert-scale-labels { display: flex; justify-content: space-between; font-size: 0.72rem; color: #999; margin-top: 2px; }
+.p4-radio-row { display: flex; flex-direction: column; gap: 6px; margin: 6px 0; }
+.p4-radio-row label { font-size: 0.88rem; display: flex; gap: 8px; align-items: center; }
+textarea.p4-textarea {
+  width: 100%; min-height: 70px; border: 1px solid #ccc; border-radius: 6px;
+  padding: 8px; font-family: inherit; font-size: 0.88rem; box-sizing: border-box;
+}
+
+/* ---- debrief / done ---- */
+.p4-code {
+  text-align: center; font-size: 1.6rem; font-weight: 700; letter-spacing: 3px;
+  background: #eef2fb; color: #275cb2; border-radius: 8px; padding: 14px;
+  margin: 14px 0;
+}
+.p4-recs { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.p4-rec-card {
+  background: white; border: 1px solid #e2e9f5; border-radius: 10px; padding: 12px;
+}
+.p4-model-compare {
+  font-size: 0.85rem; color: #555; background: #fafbfc; border: 1px solid #e0e0e0;
+  border-radius: 8px; padding: 12px 16px; margin-top: 16px;
+}

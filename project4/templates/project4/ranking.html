@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'project4/style.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="box p4-box">
+  <div class="title-container">
+    <div class="title">Rank These Movies</div>
+  </div>
+
+  <div class="main-text p4-main">
+    <div class="p4-progress-wrap">
+      <div class="p4-progress-label">Ranking {{ trial_number }} of {{ total_trials }}</div>
+      <div class="p4-progress-bar">
+        <div class="p4-progress-fill" style="width: {% widthratio trial_number total_trials 100 %}%"></div>
+      </div>
+    </div>
+
+    {% if error %}<div class="p4-error">{{ error }}</div>{% endif %}
+
+    <p class="p4-rank-note">
+      Click the movies below in order, starting with the one you would most
+      like to watch and ending with the one you would least like to watch.
+      Click a ranked movie again to remove its rank.
+    </p>
+
+    <div class="p4-rank-grid" id="rank-grid">
+      {% for movie in movies %}
+      <div class="p4-rank-card" data-id="{{ movie.id }}" onclick="p4ToggleRank(this)">
+        {% include "project4/_movie_card_body.html" with movie=movie %}
+      </div>
+      {% endfor %}
+    </div>
+
+    <form method="post" id="rank-form">
+      {% csrf_token %}
+      <input type="hidden" name="order" id="p4-order-input">
+      <input type="hidden" name="rt_ms" id="p4-rt-input">
+      <div class="p4-rank-controls">
+        <span class="p4-rank-hint" id="p4-rank-hint">0 of {{ movies|length }} ranked</span>
+        <div>
+          <button type="button" class="p4-btn p4-btn-secondary" onclick="p4UndoRank()">Undo last pick</button>
+          <button type="submit" id="p4-submit-btn" disabled>Submit ranking</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  const p4t0 = Date.now();
+  const p4Total = {{ movies|length }};
+  let p4Order = [];
+
+  function p4RenderBadges(){
+    document.querySelectorAll('.p4-rank-card').forEach(card => {
+      const id = card.dataset.id;
+      const pos = p4Order.indexOf(id);
+      const existing = card.querySelector('.p4-rank-badge');
+      if (existing) existing.remove();
+      if (pos !== -1){
+        card.classList.add('ranked');
+        const badge = document.createElement('div');
+        badge.className = 'p4-rank-badge';
+        badge.textContent = pos + 1;
+        card.appendChild(badge);
+      } else {
+        card.classList.remove('ranked');
+      }
+    });
+    document.getElementById('p4-rank-hint').textContent = `${p4Order.length} of ${p4Total} ranked`;
+    document.getElementById('p4-submit-btn').disabled = p4Order.length !== p4Total;
+  }
+
+  function p4ToggleRank(card){
+    const id = card.dataset.id;
+    const pos = p4Order.indexOf(id);
+    if (pos !== -1){
+      p4Order.splice(pos, 1);
+    } else if (p4Order.length < p4Total){
+      p4Order.push(id);
+    }
+    p4RenderBadges();
+  }
+
+  function p4UndoRank(){
+    p4Order.pop();
+    p4RenderBadges();
+  }
+
+  document.getElementById('rank-form').addEventListener('submit', () => {
+    document.getElementById('p4-order-input').value = p4Order.join(',');
+    document.getElementById('p4-rt-input').value = Date.now() - p4t0;
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,11 @@
+<div class="p4-movie-title">{{ movie.title }}{% if movie.year %} ({{ movie.year }}){% endif %}</div>
+<div class="p4-movie-meta">
+  {{ movie.rating }}{% if movie.imdb_score %} &middot; IMDb {{ movie.imdb_score }}{% endif %}
+</div>
+<div class="p4-tags">
+  {% for g in movie.genres %}<span class="p4-tag">{{ g }}</span>{% endfor %}
+  {% for k in movie.keywords %}<span class="p4-tag p4-tag-keyword">{{ k }}</span>{% endfor %}
+</div>
+<div class="p4-movie-people">
+  Dir. {{ movie.director }}{% if movie.actors %}<br>Starring {{ movie.actors|join:", " }}{% endif %}
+</div>

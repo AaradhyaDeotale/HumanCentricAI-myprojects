@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'project4/style.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="box p4-box">
+  <div class="title-container">
+    <div class="title">Project 4 &middot; Preference Elicitation</div>
+  </div>
+
+  <div class="main-text p4-main">
+    <p class="p4-intro">
+      A user study comparing two ways of eliciting movie preferences from a
+      new user: repeated <strong>pairwise choices</strong> between two
+      movies, versus <strong>ranking a list of ten</strong>. Both feed a
+      Bradley&ndash;Terry / Plackett&ndash;Luce preference model fit over the
+      {{ n_movies }} films in the IMDB&nbsp;5000 dataset.
+    </p>
+
+    <div class="p4-stats">{{ n_sessions }} completed session{{ n_sessions|pluralize }} recorded so far.</div>
+
+    <div class="p4-actions">
+      <a class="p4-btn" href="{% url 'project4:report' %}">&#128196; Download the report (PDF)</a>
+      <a class="p4-btn p4-btn-secondary" href="{% url 'project4:consent' %}">&#9654; Start the user study</a>
+    </div>
+
+    <div class="p4-design-note">
+      <strong>For the reader running this as an actual study:</strong> the
+      &ldquo;Start the user study&rdquo; link is the complete
+      participant-facing interface &mdash; consent screen, instructions,
+      both elicitation tasks (order randomized and counterbalanced), a short
+      held-out block, a post-study questionnaire, and a debrief screen with
+      a completion code. No further modification is needed to run it with
+      real participants; recruitment and procedural details are in the PDF
+      report (Task&nbsp;3).
+    </div>
+  </div>
+</div>
+{% endblock %}

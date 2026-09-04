@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'project4/style.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="box p4-box">
+  <div class="title-container">
+    <div class="title">{% if is_holdout %}Final Comparisons{% else %}Which Would You Rather Watch?{% endif %}</div>
+  </div>
+
+  <div class="main-text p4-main">
+    <div class="p4-progress-wrap">
+      <div class="p4-progress-label">Trial {{ trial_number }} of {{ total_trials }}</div>
+      <div class="p4-progress-bar">
+        <div class="p4-progress-fill" style="width: {% widthratio trial_number total_trials 100 %}%"></div>
+      </div>
+    </div>
+
+    {% if error %}<div class="p4-error">{{ error }}</div>{% endif %}
+
+    <div class="p4-pair">
+      <form method="post" class="p4-pick-form">
+        {% csrf_token %}
+        <input type="hidden" name="chosen" value="{{ movie_a.id }}">
+        <input type="hidden" name="rt_ms" class="rt-input">
+        <button type="submit" class="p4-card-btn">
+          {% include "project4/_movie_card_body.html" with movie=movie_a %}
+        </button>
+      </form>
+
+      <div class="p4-vs">vs</div>
+
+      <form method="post" class="p4-pick-form">
+        {% csrf_token %}
+        <input type="hidden" name="chosen" value="{{ movie_b.id }}">
+        <input type="hidden" name="rt_ms" class="rt-input">
+        <button type="submit" class="p4-card-btn">
+          {% include "project4/_movie_card_body.html" with movie=movie_b %}
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  const p4t0 = Date.now();
+  document.querySelectorAll('.rt-input').forEach(el => {
+    el.closest('form').addEventListener('submit', () => { el.value = Date.now() - p4t0; });
+  });
+</script>
+{% endblock %}
