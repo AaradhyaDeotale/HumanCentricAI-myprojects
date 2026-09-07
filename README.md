@@ -1,6 +1,16 @@
-# Human-Centric Artificial Intelligence - Project Portfolio
+# Group 32: Human-Centric Artificial Intelligence - Project Portfolio
 
-A Django-based web application developed for the *Human-Centric Artificial Intelligence* course at TUHH (SoSe 2026). The project bundles multiple interactive machine learning apps under a single launch page, each focusing on human-facing aspects of ML systems.
+A Django-based web application developed as part of Group 32's submission for the *Human-Centric Artificial Intelligence* course at TUHH (SoSe 2026). The project bundles multiple interactive machine learning apps under a single launch page, each focusing on human-facing aspects of ML systems.
+
+---
+
+## Group
+
+**Group 32** is a single-member group. This repository is the complete submission of:
+
+| Name | Student ID |
+|------|------------|
+| Aaradhya Deotale | 680318 |
 
 ---
 
@@ -253,3 +263,5 @@ A user study comparing two interfaces for eliciting a new user's movie preferenc
 
 **Human-Centric Artificial Intelligence**
 Hamburg University of Technology (TUHH) - SoSe 2026
+
+Submitted by **Group 32** - Aaradhya Deotale (student ID 680318), sole member.
