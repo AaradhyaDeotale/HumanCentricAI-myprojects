@@ -4,20 +4,21 @@
     {
       "label": "Setup Python venv",
       "detail": "Create venv/ if missing and install requirements.txt",
-      "type": "shell",
+      "type": "process",
       "command": "powershell",
       "args": [
         "-NoProfile",
         "-ExecutionPolicy",
         "Bypass",
-        "-File",
-        "${workspaceFolder}/.vscode/setup-venv.ps1"
+        "-Command",
+        "try { & '${workspaceFolder}\\.vscode\\setup-venv.ps1' } catch { Write-Host $_.Exception.Message -ForegroundColor Red; Read-Host 'Setup failed - press Enter to close' }"
       ],
       "presentation": {
-        "reveal": "always",
+        "reveal": "silent",
         "focus": false,
         "panel": "dedicated",
-        "clear": true
+        "clear": true,
+        "close": true
       },
       "runOptions": {
         "runOn": "folderOpen"

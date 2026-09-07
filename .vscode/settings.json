@@ -1,4 +1,30 @@
 {
   "python.defaultInterpreterPath": "${workspaceFolder}/venv/Scripts/python.exe",
-  "python.terminal.activateEnvironment": true
+
+  // The venv is activated by the terminal profile below, not by the Python
+  // extension(s). Turning the extensions' own activation off keeps the prompt
+  // from being prefixed with "(venv)" twice.
+  "python.terminal.activateEnvironment": false,
+  "python-envs.terminal.autoActivationType": "off",
+
+  // Every new integrated terminal opens here and sources the venv itself.
+  "terminal.integrated.defaultProfile.windows": "PowerShell (venv)",
+  "terminal.integrated.profiles.windows": {
+    "PowerShell (venv)": {
+      "source": "PowerShell",
+      "icon": "terminal-powershell",
+      "args": [
+        "-NoExit",
+        "-Command",
+        "$a = '${workspaceFolder}\\venv\\Scripts\\Activate.ps1'; if (Test-Path $a) { & $a } else { Write-Host 'venv not found - run  Terminal menu > Run Task > Setup Python venv' -ForegroundColor Yellow }"
+      ]
+    }
+  },
+
+  // Tasks run in a plain shell so the -NoExit profile above never leaves a
+  // task terminal hanging.
+  "terminal.integrated.automationProfile.windows": {
+    "path": "powershell.exe",
+    "args": ["-NoProfile"]
+  }
 }
